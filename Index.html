@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Desafio Financeiro - Quiz de Literacia</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <style>
+        /* Estilos CSS Atraentes e Responsivos (Mantidos do passo anterior) */
+        :root {
+            --cor-principal: #007bff; /* Azul Vibrante */
+            --cor-secundaria: #28a745; /* Verde Sucesso */
+            --cor-alerta: #dc3545; /* Vermelho Risco */
+            --cor-fundo: #e0f7fa; /* Fundo Suave Azul Claro */
+            --cor-texto: #343a40;
+            --cor-destaque: #ffc107; /* Amarelo Destaque */
+            --sombra-caixa: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--sombra-caixa);
+            transition: all 0.5s ease-in-out;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--cor-principal);
+            margin-bottom: 20px;
+        }
+        
+        /* Estilos da Capa */
+        .capa h1 {
+            color: #4a148c; 
+        }
+        .capa h3 {
+            border-bottom: 2px solid var(--cor-destaque);
+            padding-bottom: 5px;
+            color: #333;
+        }
+
+        /* Estilos do Bloco do Jogo */
+        #tituloDecisao {
+            color: #6f42c1; 
+            border-bottom: 3px solid var(--cor-principal);
+            padding-bottom: 10px;
+        }
+        #descricaoDecisao {
+            background-color: #e9f0f6; 
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 5px solid var(--cor-destaque); 
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-jogo {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: #f7f7f7;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-jogo p {
+            font-weight: bold;
+            color: var(--cor-texto);
+        }
+
+        .capa, .jogo, .resultado {
+            padding: 20px 0;
+            display: none;
+        }
+
+        .capa {
+            display: block;
+        }
+
+        /* Estilos do Formulário de Registo */
+        .registo input[type="text"], .registo input[type="email"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .membro-campos {
+            border: 2px solid #a0c4ff;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 10px;
+            background-color: #f0f8ff;
+            transition: all 0.3s;
+        }
+        .membro-campos:focus-within {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+        }
+        .membro-campos h4 {
+            margin-top: 0;
+            color: #155724; 
+            border-bottom: 1px dashed #c3e6cb;
+            padding-bottom: 5px;
+        }
+        .registo label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+
+        .btn-iniciar, .btn-decisao, .btn-reiniciar {
+            background-color: var(--cor-principal);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 30px;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-iniciar:hover, .btn-decisao:hover, .btn-reiniciar:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Estilos das Decisões (Botões) */
+        .opcoes-decisao button {
+            background-color: #f8f9fa;
+            color: var(--cor-texto);
+            padding: 18px 25px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+            font-size: 1.05em;
+            font-weight: 500;
+        }
+
+        .opcoes-decisao button:hover {
+            background-color: #e9ecef;
+            border-color: var(--cor-secundaria); 
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        /* Efeitos de Consequência/Feedback */
+        .feedback {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+            font-size: 1.1em;
+            border: 3px solid transparent;
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .positivo { 
+            background-color: #d4edda; 
+            color: var(--cor-secundaria); 
+            border-color: var(--cor-secundaria);
+        }
+        .negativo { 
+            background-color: #f8d7da; 
+            color: var(--cor-alerta); 
+            border-color: var(--cor-alerta);
+        }
+        .aviso { 
+            background-color: #fff3cd; 
+            color: #856404; 
+            border-color: var(--cor-destaque);
+        }
+
+        .saldo-jogo {
+            font-size: 1.5em;
+            color: var(--cor-alerta); 
+            padding-left: 5px;
+        }
+        .resultado .saldo-jogo {
+            color: var(--cor-secundaria); 
+            font-size: 1.8em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="capa" class="capa">
+        <h1>💰 O Desafio Financeiro: Risco & Recompensa 📈</h1>
+        <h2 style="color: #6a0dad;">Aprender a Gerir o Vosso Futuro Financeiro</h2>
+        <p style="text-align: center;">Bem-vindos, Jovens Investidores (10.º ao 12.º Anos)!</p>
+        
+        <h3>Cenário de Abertura</h3>
+        <p>Acabaram de receber 500€ (mesada e/ou rendimento de um trabalho de verão). O objetivo é gerir este dinheiro ao longo de 10 decisões críticas, de forma a maximizar o saldo final e a estabilidade, demonstrando uma excelente literacia financeira. As vossas decisões têm consequências imediatas e futuras!</p>
+
+        <form id="formRegisto" class="registo">
+            <h3>Registo do Grupo (2 a 3 Elementos)</h3>
+            <label for="nomeGrupo">Nome do Grupo/Equipa:</label>
+            <input type="text" id="nomeGrupo" name="nomeGrupo" required>
+            
+            <label for="emailDestino">Email de um elemento do grupo para Confirmação do Registo e Resultados:</label>
+            <input type="email" id="emailDestino" name="emailDestino" required>
+
+            <div class="membro-campos">
+                <h4>👤 Elemento 1</h4>
+                <label for="membro1Nome">Nome (Primeiro e Último):</label>
+                <input type="text" id="membro1Nome" name="membro1Nome" required>
+                <label for="membro1Turma">Turma:</label>
+                <input type="text" id="membro1Turma" name="membro1Turma" required>
+            </div>
+
+            <div class="membro-campos">
+                <h4>👥 Elemento 2</h4>
+                <label for="membro2Nome">Nome (Primeiro e Último):</label>
+                <input type="text" id="membro2Nome" name="membro2Nome" required>
+                <label for="membro2Turma">Turma:</label>
+                <input type="text" id="membro2Turma" name="membro2Turma" required>
+            </div>
+
+            <div class="membro-campos">
+                <h4>👨‍🎓 Elemento 3 (Opcional)</h4>
+                <label for="membro3Nome">Nome (Primeiro e Último):</label>
+                <input type="text" id="membro3Nome" name="membro3Nome">
+                <label for="membro3Turma">Turma:</label>
+                <input type="text" id="membro3Turma" name="membro3Turma">
+            </div>
+            
+            <p style="font-size: 0.8em; color: gray; margin-top: 20px;">*O código de registo (aleatório) será enviado para o email do grupo e o resultado final será enviado para o email do docente e do grupo.</p>
+            <button type="submit" class="btn-iniciar" id="btnGerarRegisto">Gerar Código e Iniciar Jogo</button>
+            <p id="msgEmail" style="text-align: center; margin-top: 15px; display: none;"></p>
+        </form>
+    </div>
+
+    <div id="jogo" class="jogo">
+        <div class="header-jogo">
+            <p>🎯 Rodada: <span id="rodadaAtual">0</span>/10</p>
+            <p>💶 Saldo Atual: <span id="saldoAtual" class="saldo-jogo">500.00€</span></p>
+            <p>⏱ Tempo de Jogo: <span id="tempoJogo">00:00</span></p>
+        </div>
+
+        <h2 id="tituloDecisao"></h2>
+        <p id="descricaoDecisao"></p>
+
+        <div id="opcoesDecisao" class="opcoes-decisao">
+            </div>
+
+        <div id="feedback" class="feedback">
+            </div>
+    </div>
+
+    <div id="resultado" class="resultado">
+        <h1 style="color: var(--cor-secundaria);">🏆 Fim do Desafio! 🏆</h1>
+        <p style="text-align: center;">Parabéns! Completaram as 10 decisões financeiras.</p>
+        
+        <h3>📊 O Vosso Desempenho:</h3>
+        <p style="font-size: 1.1em;"><strong>Nome do Grupo:</strong> <span id="resultadoNomeGrupo"></span></p>
+        <p style="font-weight: 600; margin-top: 15px;">Membros:</p>
+        <div id="resultadoMembros" style="background-color: #f7f7f7; padding: 10px; border-radius: 8px;">
+            </div>
+        <h3 style="margin-top: 20px;">Saldo Final: <span id="resultadoSaldoFinal" class="saldo-jogo"></span></h3>
+        <p><strong>Tempo Total de Jogo:</strong> <span id="resultadoTempo"></span></p>
+        
+        <p style="margin-top: 25px; color: #6c757d;">A pontuação e o tempo total de jogo serão avaliados para a classificação final. O resultado foi enviado para o seu email (aluno) e para o email dos docentes coordenadores.</p>
+        
+        <button class="btn-reiniciar" onclick="location.reload()">Reiniciar Jogo</button>
+    </div>
+
+</div>
+
+<script>
+    // Configurações do EmailJS 
+    const EMAILJS_SERVICE_ID = 'service_wi13tin'; 
+    const EMAILJS_TEMPLATE_REGISTO_ID = 'template_3mv5huj';
+    const EMAILJS_TEMPLATE_RESULTADO_ID = 'template_dk2aboo';
+    const EMAILJS_PUBLIC_KEY = 'd9d86G7bDE1WQ8eDy'; 
+
+    // <<<<<<<<<<<<<<< ALTERAÇÃO CRÍTICA PARA GARANTIR O CONTROLO DOS RESULTADOS >>>>>>>>>>>>>>>>
+    // **ATENÇÃO:** SUBSTITUA ESTE ENDEREÇO PELO SEU EMAIL DE DOCENTE REAL!
+    const EMAIL_DOCENTE_FIXO = 'ana.silva.430@aemlaranjeira.pt'; 
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    // Tempo de espera após a decisão (em milissegundos)
+    const TEMPO_FEEDBACK_MS = 7000; // 7 segundos 
+
+    // Inicialização do EmailJS
+    (function() {
+        emailjs.init({
+            publicKey: EMAILJS_PUBLIC_KEY,
+        });
+    })();
+
+    // Variáveis do Jogo
+    let rodada = 0;
+    let saldo = 500.00; 
+    let penalizacaoRisco = 0; 
+    let pontuacaoTotal = 0; 
+    let tempoInicio;
+    let timerInterval;
+    let codigoRegisto = '';
+    let nomeGrupo = '';
+    let emailDestino = ''; // Email do Grupo
+    let membrosGrupoHTML = ''; 
+
+
+
+    // ESTRUTURA DAS DECISÕES (NOVOS CENÁRIOS DE ALTA DIFICULDADE INTEGRADOS)
+    const decisoes = [
+        {
+            rodada: 1,
+            titulo: "O Primeiro Rendimento e a Tentação (Necessidade vs Desejo)",
+            tema: "Planeamento e Gestão do Orçamento: Necessidades e Desejos",
+            pergunta: "Recebe 500€. Precisa de 200€ para se deslocar durante o mês. Um novo PC Gamer (1200€) está em promoção, e pensa em comprar às prestações.",
+            opcoes: [
+                // C: Garante o essencial e poupa o resto para o PC (melhor decisão)
+                { texto: "Separa os 200€ para a sua mobilidade e poupa o restante (300€).", custo: 200, pontuacao: 15, feedback: "Inteligente. Garantiu a *necessidade* e iniciou a *poupança* com disciplina.", consequencia: (s) => s + 300, penalizacao: 0 },
+                // A: Compra o PC (desejo), gastando os 500€ e arranjando 700€ de dívida (Alto Risco)
+                { texto: "Gasta os 500€ num sinal para o PC Gamer e adia a sua mobilidade.", custo: 500, pontuacao: -15, feedback: "Péssimo. Priorizou o *desejo*. Começa o jogo sem margem e com *dívida* (Risco/Crédito).", consequencia: (s) => s - 700, penalizacao: 3 },
+            ]
+        },
+        {
+            rodada: 2,
+            titulo: "O Poder do Hábito",
+            tema: "Poupança: Objetivos da Poupança; Aplicações da Poupança",
+            pergunta: "Tem 400€ a mais este mês. O banco oferece: A) Conta à Ordem (recebe 8€ de juros); B) Certificado de Aforro (2% ao ano, capitalização trimestral). O dinheiro será para daqui a 2 anos.",
+            opcoes: [
+                // B: Escolha de juro composto (melhor)
+                { 
+                    texto: "Coloca os 400€ no Certificado de Aforro (2% composto).", 
+                    custo: -400, // Isto representa uma entrada de 400€ no saldo, que será subtraída na lógica da função tomarDecisao
+                    pontuacao: 20, 
+                    feedback: "Excelente. Compreende o *juro composto* e a aplicação a *médio prazo*. Potencializa o crescimento.", 
+                    // CORREÇÃO CRÍTICA: s + Principal * (1 + Taxa/Frequência) ^ (Frequência * Anos)
+                    // Frequência = 4 (trimestral), Anos = 2, Total de capitalizações = 8
+                    consequencia: (s) => s + 400 * Math.pow((1 + (0.02 / 4)), 8), 
+                    penalizacao: 0 
+                },
+                // A: Escolha de juro simples (pouco retorno)
+                { 
+                    texto: "Deixa os 400€ na Conta à Ordem (1% simples).", 
+                    custo: -400, // Entrada de 400€
+                    pontuacao: 5, 
+                    feedback: "Poupa, mas a escolha da aplicação é fraca. O dinheiro não trabalha o suficiente (Juro Composto).", 
+                    // CÁLCULO ORIGINAL (MANTIDO, mas simplificado para um ano): s + 400 + (400 * 0.01) + (400 * 0.01)
+                    consequencia: (s) => s + 400 * (1 + 0.01 * 2), // Juro simples de 2 anos
+                    penalizacao: 1 
+                },
+            ]
+        },
+        {
+            rodada: 3,
+            titulo: "O Custo Real do Crédito",
+            tema: "Crédito: Custos do Crédito",
+            pergunta: "Quer um bilhete de festival (250€). A loja anuncia: 'Crédito 0% de Juros' (Taxa Nominal 0%), e a TAEG (Custo Total) é 10% com o seguro e as comissões. Paga 12x 21.80€.",
+            opcoes: [
+                { 
+                    texto: "Paga os 250€ do seu saldo, evitando qualquer crédito.", 
+                    custo: 250, 
+                    pontuacao: 15, 
+                    feedback: "Melhor opção. Evitou a dívida e o custo real da TAEG.", 
+                    consequencia: null, 
+                    penalizacao: 0 
+                },
+                { 
+                    texto: "Aceita a oferta de crédito, pois '0% de juros' parece bom.", 
+                    custo: 0, // Mantido a 0 porque o grupo não está a usar o saldo disponível *imediatamente*
+                    pontuacao: -10, 
+                    feedback: "Caiu na armadilha do 0%. Falhou em identificar o *Custo Real do Crédito* (TAEG) devido a comissões. O custo total de 261.60€ será subtraído do seu saldo agora, representando a dívida imediata.", 
+                    // CORREÇÃO: Subtraímos o custo total da dívida (12 * 21.80 = 261.60€)
+                    consequencia: (s) => s - 261.60, 
+                    penalizacao: 2 
+                },
+            ]
+        },
+        {
+            rodada: 4,
+            titulo: "O Imprevisto e o Fundo de Emergência",
+            tema: "Risco e Incerteza; Planeamento",
+            // Ajustado para refletir o saldo atual na string (embora o JS substitua dinamicamente)
+            pergunta: "O seu rendimento do part-time é cortado em 50% por 3 meses (perda total de 750€). O seu saldo atual é de [SALDO_AQUI] €. Como gere a situação para cobrir a perda?", 
+            opcoes: [
+                { 
+                    texto: "Se o saldo for >= 750€, usa o Fundo de Emergência.", 
+                    custo: 750, 
+                    pontuacao: (saldo >= 750 ? 25 : -25), 
+                    feedback: (saldo >= 750 ? "Perfeito. O *Planeamento* e o *Fundo de Emergência* mitigaram a incerteza." : "Mau. Tentou usar o fundo, mas não tinha o suficiente. Risco de Incumprimento."),
+                    // Lógica: O saldo (s) já foi subtraído do custo (750€). A consequência é nula.
+                    consequencia: (s) => s, 
+                    penalizacao: (saldo >= 750 ? 0 : 3) 
+                },
+                { 
+                    texto: "Vende um bem (exemplo: telemóvel) por 400€ e pede um empréstimo familiar para o resto.", 
+                    // Custo 0, mas a consequência simula o custo total da perda de 750€ (400€ ganho + 350€ dívida)
+                    custo: 0, 
+                    pontuacao: -10, 
+                    feedback: "Opção drástica. Não tinha Fundo de Emergência e teve de descapitalizar-se, assumindo uma dívida familiar.", 
+                    // CORREÇÃO: s - 750 (perda) + 400 (venda) + 350 (empréstimo) = s. O saldo não se altera, a punição é na pontuação/risco.
+                    consequencia: (s) => s, 
+                    penalizacao: 2 
+                },
+            ]
+        },
+        {
+            rodada: 5,
+            titulo: "Esquemas Ponzi e Ética",
+            tema: "Ética e Responsabilidade Social; Prevenção de Fraude",
+            pergunta: "Um colega promete 30% de retorno em 1 mês numa 'crypto garantida' e pede que você recrute 3 amigos para ganhar um bónus (100€).",
+            opcoes: [
+                { texto: "Denuncia o esquema de pirâmide/Ponzi às autoridades e avisa os amigos.", custo: 0, pontuacao: 30, feedback: "Atitude exemplar! Demonstra ética, *responsabilidade social* e prevenção de fraude (Sistema Financeiro).", consequencia: null, penalizacao: 0 },
+                { texto: "Investe 100€ (do seu bolso), mas recusa recrutar amigos.", custo: 100, pontuacao: -10, feedback: "Apesar de ético, é irresponsável com o seu dinheiro. Falhou em reconhecer o *alto risco*.", consequencia: null, penalizacao: 2 },
+            ]
+        },
+        {
+            rodada: 6,
+            titulo: "A Meta da Casa e o Impacto da Inflação (Longo Prazo)",
+            tema: "Planeamento (Longo Prazo); Risco e Incerteza (Inflação)",
+            pergunta: "A sua meta de 50.000€ daqui a 10 anos será desvalorizada pela inflação (estimada em 2.5% ao ano). Onde aplica os 500€ deste mês?",
+            opcoes: [
+                { 
+                    texto: "Coloca num Depósito a Prazo (Rendimento 2% ao ano).", 
+                    custo: 500, 
+                    pontuacao: -10, 
+                    feedback: "Mau planeamento. A *Inflação* (2.5%) é superior ao rendimento (2%). Está a perder poder de compra.", 
+                    // CORREÇÃO (Capitalização anual durante 10 anos)
+                    consequencia: (s) => s + 500 * Math.pow((1 + 0.02), 10), 
+                    penalizacao: 1 
+                },
+                { 
+                    texto: "Investe num EFT (fundo de investimento negociado em bolsa) Global (Rendimento médio 6% ao ano).", 
+                    custo: 500, 
+                    pontuacao: 25, 
+                    feedback: "Decisão de longo prazo. O *Rendimento* (6%) supera a *Inflação* (2.5%). Assumiu risco moderado de forma inteligente.", 
+                    // CORREÇÃO (Capitalização anual durante 10 anos)
+                    consequencia: (s) => s + 500 * Math.pow((1 + 0.06), 10), 
+                    penalizacao: 0 
+                },
+            ]
+        },
+        {
+            rodada: 7,
+            titulo: "Pagamentos e Irrevogabilidade (Segurança e Fraude)",
+            tema: "Sist. Financeiro: Meios de Pagamento; Prevenção de Fraude",
+            pergunta: "Precisa de pagar 150€ a um desconhecido online. Este insiste em Transferência Imediata (MB Way) em vez de um cartão virtual, porque é 'mais rápido'.",
+            opcoes: [
+                { texto: "Envia a Transferência Imediata (MB Way) para não perder o negócio.", custo: 150, pontuacao: -15, feedback: "Alto Risco! A *Transferência Imediata* é irrevogável. Falhou na *Prevenção de Fraude*.", consequencia: null, penalizacao: 3 },
+                { texto: "Sugere um Cartão Virtual Pré-Pago para ter proteção e limitar o risco.", custo: 150, pontuacao: 20, feedback: "Decisão de segurança. Usou um *meio de pagamento* que protege os seus fundos (Prevenção de Fraude).", consequencia: null, penalizacao: 0 },
+            ]
+        },
+        {
+            rodada: 8,
+            titulo: "O Portfólio (Diversificação e Risco)",
+            tema: "Poupança: Aplicações da Poupança; Risco e Incerteza",
+            pergunta: "Tem 2000€ disponíveis para investir a longo prazo. Deve dividir: Ações Alto Risco (80%) e Depósitos (20%); ETF Global (50%), Depósitos (30%), Obrigações (20%).",
+            opcoes: [
+                { texto: "A) Ações (80%) e Depósitos (20%).", custo: 0, pontuacao: -5, feedback: "Demasiado *Risco*. Não há *Diversificação* suficiente e o capital está muito exposto à incerteza.", consequencia: null, penalizacao: 2 },
+                { texto: "B) ETF Global (50%), Depósitos (30%), Obrigações (20%).", custo: 0, pontuacao: 25, feedback: "Estratégia profissional. Demonstra excelente *Diversificação* e avaliação do risco.", consequencia: null, penalizacao: 0 },
+            ]
+        },
+        {
+            rodada: 9,
+            titulo: "O Empréstimo do Carro (Taxa de Esforço)",
+            tema: "Crédito: Capacidades Financeiras; Responsabilidades do Crédito",
+            pergunta: "Precisa de um carro. A prestação mensal (120€) compromete 24% do seu rendimento líquido disponível (500€). O banco sugere 48 meses de prestação. Deve reduzir a prestação?",
+            opcoes: [
+                { texto: "Pede um crédito mais longo (72 meses) para reduzir a prestação para 80€ (16% de taxa de esforço).", custo: 0, pontuacao: 15, feedback: "Melhor gestão! Reduziu a *Taxa de Esforço* para um nível seguro (melhor *capacidade financeira*), embora pague mais juros.", consequencia: null, penalizacao: 1 },
+                { texto: "Mantém a prestação de 120€ (24% de taxa de esforço) para pagar mais rápido.", custo: 0, pontuacao: -5, feedback: "Risco desnecessário. A *Taxa de Esforço* de 24% é alta e limita as suas capacidades para imprevistos.", consequencia: null, penalizacao: 3 },
+            ]
+        },
+        { 
+            rodada: 10,
+            titulo: "Balanço Final: Capacidade Financeira (Custo do Risco)",
+            tema: "Direitos e Deveres: Informação Financeira; Ética",
+            pergunta: "O vosso grupo precisa de 300€ para um curso de formação. Avaliem a vossa capacidade financeira com base no vosso *histórico* de dívidas e poupanças (influência das rodadas anteriores).",
+            opcoes: [
+                { 
+                    texto: "Pedir um empréstimo de 300€. (O juro é influenciado pelas penalizações de risco e crédito acumuladas).", 
+                    custo: 0, 
+                    pontuacao: -2, 
+                    feedback: "⚠️ ALTO CUSTO: O seu histórico de risco fez o empréstimo ser mais caro. Assumiu o custo total do seu mau planeamento inicial.", 
+                    // Novo Saldo = Saldo Atual - Custo Principal (300) - Juros Acumulados
+                    consequencia: (s) => s - 300 - (300 * (0.10 + penalizacaoRisco * 0.02)), 
+                    penalizacao: 0
+                },
+                { 
+                    texto: "Usar a poupança acumulada no saldo atual (Se o saldo for superior a 300€).", 
+                    custo: 300, 
+                    pontuacao: 4, 
+                    feedback: "✅ Ótimo: Se o saldo for suficiente, usaram a poupança para suprir a necessidade sem recorrer a crédito. (+4 pontos).", 
+                    consequencia: null, 
+                    penalizacao: 0
+                }
+            ]
+        }
+    ];
+
+    // Funções do Jogo
+    
+    function gerarCodigo() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    // A função de registo envia o código APENAS para o email do grupo (por isso não mudamos o template aqui)
+    document.getElementById('formRegisto').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        nomeGrupo = document.getElementById('nomeGrupo').value;
+        emailDestino = document.getElementById('emailDestino').value;
+        codigoRegisto = gerarCodigo();
+
+        // ... [Lógica de recolha de membros mantida] ...
+        let membros = [];
+        for (let i = 1; i <= 3; i++) {
+            const nomeEl = document.getElementById(`membro${i}Nome`);
+            const turmaEl = document.getElementById(`membro${i}Turma`);
+            
+            if (nomeEl.value && nomeEl.value.trim() !== '') {
+                membros.push({
+                    nome: nomeEl.value.trim(),
+                    turma: turmaEl.value.trim() || 'N/A' 
+                });
+            }
+        }
+        
+        if (membros.length < 2) {
+            alert("Por favor, preencha os dados de pelo menos 2 elementos do grupo.");
+            return;
+        }
+
+        membrosGrupoHTML = membros.map((m, index) => 
+            `<li><strong>Elemento ${index + 1}:</strong> ${m.nome} (${m.turma})</li>`
+        ).join('');
+        
+        const membrosGrupoEmail = membros.map((m, index) => 
+            `Elemento ${index + 1}: ${m.nome} (Turma: ${m.turma})`
+        ).join('\n'); 
+
+        const msgEmailEl = document.getElementById('msgEmail');
+        msgEmailEl.style.display = 'block';
+        msgEmailEl.textContent = 'A enviar código...';
+
+        const templateParams = {
+            nomeGrupo: nomeGrupo,
+            codigoRegisto: codigoRegisto,
+            // Envia o código de registo para o email do grupo
+            emailDestino: emailDestino, 
+            membrosGrupo: membrosGrupoEmail
+        };
+
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_REGISTO_ID, templateParams)
+            .then(function(response) {
+                msgEmailEl.style.backgroundColor = 'var(--cor-secundaria)';
+                msgEmailEl.style.color = 'white';
+                msgEmailEl.textContent = `Código '${codigoRegisto}' enviado com sucesso! O jogo irá começar...`;
+                iniciarJogo(membros);
+            }, function(error) {
+                // SE HOUVER ERRO DE ENVIO DO EMAIL DE REGISTO, O JOGO COMEÇA IGUALMENTE
+                msgEmailEl.style.backgroundColor = 'var(--cor-alerta)';
+                msgEmailEl.style.color = 'white';
+                msgEmailEl.textContent = `Erro ao enviar o código: ${error.text}. Por favor, anote o código: ${codigoRegisto}. O jogo irá começar...`;
+                iniciarJogo(membros);
+            });
+    });
+
+    function iniciarJogo(membros) {
+        document.getElementById('capa').style.display = 'none';
+        document.getElementById('jogo').style.display = 'block';
+        rodada = 0;
+        saldo = 500.00; 
+        penalizacaoRisco = 0;
+        pontuacaoTotal = 0; // Reiniciar pontuação total no início do jogo
+        
+        tempoInicio = Date.now();
+        timerInterval = setInterval(atualizarTempo, 1000);
+        
+        proximaDecisao();
+    }
+
+    function atualizarTempo() {
+        const tempoDecorrido = Date.now() - tempoInicio;
+        const segundos = Math.floor(tempoDecorrido / 1000) % 60;
+        const minutos = Math.floor(tempoDecorrido / 1000 / 60);
+        
+        const tempoFormatado = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        document.getElementById('tempoJogo').textContent = tempoFormatado;
+    }
+
+    function proximaDecisao() {
+        if (rodada >= decisoes.length) {
+            terminarJogo();
+            return;
+        }
+
+        const decisaoAtual = decisoes[rodada];
+        
+        document.getElementById('rodadaAtual').textContent = rodada + 1;
+        document.getElementById('saldoAtual').textContent = saldo.toFixed(2) + '€';
+        document.getElementById('tituloDecisao').textContent = `Decisão ${rodada + 1}: ${decisaoAtual.titulo}`;
+       
+        let perguntaFormatada = decisaoAtual.pergunta;
+        
+        // Se a pergunta contiver o placeholder, substitui pelo saldo atual.
+        if (perguntaFormatada.includes('[SALDO_AQUI]')) {
+            perguntaFormatada = perguntaFormatada.replace('[SALDO_AQUI]', saldo.toFixed(2));
+        }
+        
+        document.getElementById('descricaoDecisao').textContent = perguntaFormatada;
+        const opcoesDiv = document.getElementById('opcoesDecisao');
+        opcoesDiv.innerHTML = '';
+        document.getElementById('feedback').style.display = 'none';
+
+        decisaoAtual.opcoes.forEach((opcao, index) => {
+            const btn = document.createElement('button');
+            btn.innerHTML = `<span>➡️</span> Opção ${index + 1}: ${opcao.texto}`; 
+            btn.onclick = () => tomarDecisao(index); 
+            opcoesDiv.appendChild(btn);
+        });
+    }
+
+    function tomarDecisao(indiceOpcao) {
+        const decisaoAtual = decisoes[rodada];
+        const opcaoEscolhida = decisaoAtual.opcoes[indiceOpcao];
+     
+        let pontuacaoMudanca = opcaoEscolhida.pontuacao;
+      
+        let novoSaldo = parseFloat(saldo); 
+        
+        if (isNaN(novoSaldo)) {
+            console.error("Erro: Saldo inicial não é um número. Usando valor de fallback.");
+            novoSaldo = 500.00; 
+        }
+
+        let feedbackHTML = `<p>${opcaoEscolhida.feedback}</p>`;
+
+        // 2. Aplicação do custo (Subtrai se positivo, Soma se negativo)
+        if (opcaoEscolhida.custo !== null && typeof opcaoEscolhida.custo === 'number') {
+             if (opcaoEscolhida.custo > 0) {
+                 novoSaldo = novoSaldo - opcaoEscolhida.custo;
+             } else if (opcaoEscolhida.custo < 0) {
+                 novoSaldo = novoSaldo + Math.abs(opcaoEscolhida.custo);
+             }
+        }
+
+        // 3. Aplicação da consequência (juros/risco/lucro)
+        if (typeof opcaoEscolhida.consequencia === 'function') {
+            const saldoAposConsequencia = opcaoEscolhida.consequencia(novoSaldo);
+            novoSaldo = isNaN(saldoAposConsequencia) ? novoSaldo : saldoAposConsequencia;
+        }
+      
+
+        // 4. Acumulação da Pontuação e Risco
+        pontuacaoTotal += pontuacaoMudanca; 
+
+        if (opcaoEscolhida.penalizacao !== null) {
+            // <<<<<< CORREÇÃO CRÍTICA AQUI: GARANTIR QUE É UM NÚMERO ANTES DE SOMAR
+            const penalizacaoNumerica = parseFloat(opcaoEscolhida.penalizacao);
+            
+            if (!isNaN(penalizacaoNumerica)) {
+                penalizacaoRisco += penalizacaoNumerica; 
+                feedbackHTML += `<p><strong>⚠️ Risco Acumulado:</strong> Acrescentaram ${penalizacaoNumerica} pontos de Risco/Crédito para decisões futuras. Total: ${penalizacaoRisco}.</p>`;
+            } else {
+                 console.warn("Valor de penalização não é numérico e foi ignorado.");
+            }
+            // >>>>>> CORREÇÃO
+        }
+
+        // --- LÓGICA ESPECÍFICA DA RODADA 10: Aplicar Custo do Empréstimo ---
+        if (rodada === 9 && decisaoAtual.opcoes[indiceOpcao].texto.includes('Pedir um empréstimo')) { 
+             // Se for Rodada 10 (indice 9) e escolher pedir empréstimo
+             const juroPercentual = 0.10 + penalizacaoRisco * 0.02; // 10% base + 2% por ponto de risco
+             const custoJuro = 300 * juroPercentual;
+             const custoTotal = 300 + custoJuro;
+             
+             // O novo saldo já está calculado na consequência (s - 300 - custoJuro)
+             feedbackHTML += `<p><strong>Custo Final do Empréstimo:</strong> 300.00€ (Principal) + ${custoJuro.toFixed(2)}€ (Juros, Taxa de ${Math.round(juroPercentual * 100)}%). O seu saldo reflete esta dedução.</p>`;
+        }
+        // --- FIM LÓGICA ESPECÍFICA ---
+
+
+        // 5. Atualização e Feedback
+        saldo = novoSaldo;
+        rodada++;
+        
+        const feedbackEl = document.getElementById('feedback');
+        
+        feedbackHTML += pontuacaoMudanca !== 0 ? `<p><strong>📊 Pontuação:</strong> ${pontuacaoMudanca > 0 ? '+' : ''}${pontuacaoMudanca} pontos de Literacia. (Total: ${pontuacaoTotal})</p>` : '';
+        feedbackHTML += `<p>O seu Saldo após esta decisão é de: <strong class="saldo-jogo" style="color: ${saldo >= 500 ? 'var(--cor-secundaria)' : 'var(--cor-alerta)'}">${saldo.toFixed(2)}€</strong></p>`;
+
+        feedbackEl.innerHTML = feedbackHTML;
+
+        if (pontuacaoMudanca > 0) {
+            feedbackEl.className = 'feedback positivo';
+        } else if (pontuacaoMudanca < 0) {
+            feedbackEl.className = 'feedback negativo';
+        } else {
+            feedbackEl.className = 'feedback aviso';
+        }
+        
+        document.getElementById('saldoAtual').textContent = saldo.toFixed(2) + '€';
+        feedbackEl.style.display = 'block';
+
+        document.getElementById('opcoesDecisao').innerHTML = `<p style="text-align: center; color: var(--cor-principal); font-weight: bold;">Próxima decisão em ${TEMPO_FEEDBACK_MS / 1000} segundos...</p>`;
+
+        setTimeout(() => {
+            proximaDecisao();
+        }, TEMPO_FEEDBACK_MS);
+    }
+
+
+    function terminarJogo() {
+        clearInterval(timerInterval);
+        const tempoFinalFormatado = document.getElementById('tempoJogo').textContent;
+
+        document.getElementById('jogo').style.display = 'none';
+        document.getElementById('resultado').style.display = 'block';
+
+        // Preencher os resultados
+        document.getElementById('resultadoNomeGrupo').textContent = nomeGrupo;
+        document.getElementById('resultadoMembros').innerHTML = `<ul style="list-style-type: none; padding-left: 0;">${membrosGrupoHTML}</ul>`; 
+        
+        const saldoFinalArredondado = parseFloat(saldo).toFixed(2);
+        document.getElementById('resultadoSaldoFinal').textContent = saldoFinalArredondado + '€';
+        document.getElementById('resultadoTempo').textContent = tempoFinalFormatado;
+        
+        // Envio do resultado por EmailJS 
+        enviarResultadoFinal(saldoFinalArredondado, tempoFinalFormatado);
+    }
+
+    // FUNÇÃO DE ENVIO CORRIGIDA
+    function enviarResultadoFinal(saldoFinal, tempoJogo) {
+        
+        const membrosGrupoEmail = membrosGrupoHTML.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
+
+        // Parâmetros para enviar o email
+        const templateParams = {
+            nomeGrupo: nomeGrupo,
+            codigoRegisto: codigoRegisto,
+            // ATENÇÃO: emailDocente e emailGrupo foram adicionados como variáveis de template
+            emailDocente: EMAIL_DOCENTE_FIXO, 
+            emailGrupo: emailDestino, 
+            membrosGrupo: membrosGrupoEmail, 
+            saldoFinal: saldoFinal,
+            tempoJogo: tempoJogo,
+            riscoAcumulado: penalizacaoRisco, // <<< NOVO: Dados de avaliação
+            pontuacaoFinal: pontuacaoTotal   // <<< NOVO: Dados de avaliação
+        };
+
+        // Envia o resultado. Deve configurar o seu Template (EMAILJS_TEMPLATE_RESULTADO_ID) 
+        // para incluir {{emailDocente}} no campo 'To' e {{emailGrupo}} no campo 'CC' (Cópia).
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RESULTADO_ID, templateParams)
+            .then(function(response) {
+                console.log('Resultado enviado com sucesso!', response.status, response.text);
+            }, function(error) {
+                console.log('Falha no envio do resultado...', error);
+            });
+    }
+
+</script>
+
+</body>
+</html>
